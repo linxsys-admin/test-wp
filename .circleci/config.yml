@@ -6,26 +6,16 @@ jobs:
       - master
       - develop
     docker:
-      - image: circleci/php:7.1.5-browsers
-    steps:
-      - checkout
-      - run:
-          name: Save version
-          command: echo "${CIRCLE_SHA1:0:7}" > version.txt
-      - run:
-          name: env variables
-          command: env | sort
-  build_docker:
-    working_directory: ~/wp
-    branches:
-      - master
-    docker:
       - image: docker:17.09.0-ce-git
     steps:
+      - checkout
       - setup_remote_docker
       - run:
+          name: Save version
+          command: echo "${CIRCLE_BRANCH}_${CIRCLE_SHA1:0:7}" > version.txt
+      - run:
           name: List current directory
-          command: ls -lA
+          command: docker run --rm -t -v $(pwd):/app -w /app alpine:latest ls -lA
       - run:
           name: Build application Docker image
           command: |
