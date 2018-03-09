@@ -18,7 +18,7 @@ jobs:
           command: ls -lA
       - run:
           name: List current directory
-          command: docker run --rm -t -v $(pwd):/app -w /app alpine:latest ls -lA
+          command: docker run --rm -t -v /root/wp:/app -w /app alpine:latest ls -lA
       - run:
           name: Build application Docker image
           command: |
