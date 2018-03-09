@@ -1,9 +1,12 @@
 version: 2
 jobs:
   build:
+    working_directory: ~/wp
+    branches:
+      - master
+      - develop
     docker:
       - image: circleci/php:7.1.5-browsers
-    working_directory: ~/
     steps:
       - checkout
       - run:
@@ -13,7 +16,9 @@ jobs:
           name: env variables
           command: env | sort
   build_docker:
-    working_directory: ~/
+    working_directory: ~/wp
+    branches:
+      - master
     docker:
       - image: docker:17.09.0-ce-git
     steps:
