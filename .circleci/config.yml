@@ -16,12 +16,14 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: npm build
+      # - run: npm build
   build_docker:
     working_directory: ~/wp
     docker:
       - image: docker:17.09.0-ce-git
     steps:
+      - checkout
+      - setup_remote_docker
       - run:
         name: Build application Docker image
         command: |
@@ -51,3 +53,5 @@ workflows:
               only:
                 - master
                 - develop
+          requires:
+            - build
