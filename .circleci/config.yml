@@ -22,6 +22,8 @@ jobs:
       # - run: npm build
       - persist_to_workspace:
           root: /tmp/workspace
+          paths:
+            - .
   build_docker:
     <<: *defaults
     docker:
