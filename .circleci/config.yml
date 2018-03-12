@@ -1,22 +1,11 @@
 version: 2
 jobs:
-  checkout_code:
-    working_directory: ~/workflow
-    docker:
-      - image: circleci/node:8.9.4
-    steps:
-      - checkout
-      - save_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ~/workflow
   build:
     working_directory: ~/workflow
     docker:
       - image: circleci/node:8.9.4
     steps:
-      - restore_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+      - checkout
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
@@ -57,15 +46,12 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - checkout_code
       - build:
           filters:
             branches:
               only:
                 - master
                 - develop
-          requires:
-            - checkout_code
       - build_docker:
           filters:
             branches:
