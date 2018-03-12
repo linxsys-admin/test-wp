@@ -1,7 +1,10 @@
+defaults: &defaults
+  working_directory: /tmp/workspace
+
 version: 2
 jobs:
   build:
-    working_directory: ~/workflow
+    <<: *defaults
     docker:
       - image: circleci/node:8.9.4
     steps:
@@ -17,20 +20,16 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm build
-      - save_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ~/workflow
+      - persist_to_workspace:
+          root: /tmp/workspace
   build_docker:
-    working_directory: ~/workflow
+    <<: *defaults
     docker:
       - image: docker:17.09.0-ce-git
     steps:
       - setup_remote_docker
-      - restore_cache:
-          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-          paths:
-            - ~/workflow
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Build application Docker image
           command: |
