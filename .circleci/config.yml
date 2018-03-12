@@ -1,11 +1,22 @@
 version: 2
 jobs:
-  build:
-    working_directory: ~/wp
+  checkout_code:
+    working_directory: ~/workflow
     docker:
       - image: circleci/node:8.9.4
     steps:
       - checkout
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/workflow
+  build:
+    working_directory: ~/workflow
+    docker:
+      - image: circleci/node:8.9.4
+    steps:
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "package.json" }}
@@ -18,11 +29,12 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm build
   build_docker:
-    working_directory: ~/wp
+    working_directory: ~/workflow
     docker:
       - image: docker:17.09.0-ce-git
     steps:
-      - checkout
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - setup_remote_docker
       - run:
           name: Build application Docker image
@@ -34,19 +46,22 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               mkdir -p ~/.docker
               echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$DOCKER_CREDS\"}}}" > ~/.docker/config.json
-              docker push "${DOCKER_IMAGE_REPO}:${CIRCLE_SHA1:0:7}"
+              docker push "${DOCKER_IMAGE_REPO}:${CIRCLE_SHA1:0:9}"
               rm -f ~/.docker/config.json
             fi
 workflows:
   version: 2
   build_and_test:
     jobs:
+      - checkout_code:
       - build:
           filters:
             branches:
               only:
                 - master
                 - develop
+          requires:
+            - checkout_code
       - build_docker:
           filters:
             branches:
